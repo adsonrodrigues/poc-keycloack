@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  service:
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/usr/local/app
+    ports:
+      - 80:80
+    env_file:
+      - ./core/.env
+    depends_on:
+      - db
+    stdin_open: true
+    tty: true
+    restart: always
+    networks:
+      - keycloack-network
+
+  db:
+    image: postgres:14
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+      - .:/usr/local/app
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root1234
+      - POSTGRES_DB=db
+    restart: always
+    ports:
+      - 5432:5432
+    networks:
+      - keycloack-network
+
+  cache:
+    image: redis:6.2-alpine
+    volumes: 
+      - cache:/data
+    environment:
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - keycloack-network
+
+volumes:
+  db_data:
+  cache:
+
+networks:
+  keycloack-network:
+    name: keycloack-network
+    driver: bridge
